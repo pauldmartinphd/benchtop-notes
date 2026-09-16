@@ -1,61 +1,89 @@
-# Storage and I/O
-
 ## I/O Scheduler
 
-##### /etc/udev/rules.d/10-iosched.rules
-    # BFQ is recommended for slow storage such as rotational block devices and SD cards.
-    ACTION=="add|change", SUBSYSTEM=="block", ATTR{queue/rotational}=="1", ATTR{queue/scheduler}="bfq"
-    ACTION=="add|change", SUBSYSTEM=="block", KERNEL=="mmcblk?", ATTR{queue/scheduler}="bfq"
+BFQ is used for rotational disks and slow removable flash because it prioritizes fairness and interactive latency when individual I/O operations are expensive. Kyber is used for SSDs and NVMe because it provides low-overhead queue management suited to fast multiqueue storage. Since USB SSDs and flash drives both appear as `sd*` devices, non-rotational `sd*` devices default to Kyber, with removable USB media explicitly overridden back to BFQ.
 
-    # Kyber is recommended for faster storage such as NVME and SATA SSDs.
-    # Note: For very fast NVMe drives, `none` (noop) may outperform kyber since the
-    # device's internal scheduler is already optimal and a host-side scheduler adds
-    # overhead. Consider `none` for high-end NVMe, `kyber` for SATA SSDs.
-    ACTION=="add|change", SUBSYSTEM=="block", ATTR{queue/rotational}=="0", KERNEL=="nvme?n?", ATTR{queue/scheduler}="kyber"
-    ACTION=="add|change", SUBSYSTEM=="block", ATTR{queue/rotational}=="0", KERNEL=="sd?", ATTR{queue/scheduler}="kyber"
+## /etc/udev/rules.d/70-iosched.rules
+
+    # /etc/udev/rules.d/10-iosched.rules
+
+	#
+	# Slow storage
+	#
+	# BFQ prioritizes fairness and interactive latency and is well suited to
+	# rotational disks and relatively slow flash media.
+	#
+	
+	# Rotational disks: SATA/SAS/USB HDDs.
+	ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", \
+	    ATTR{queue/rotational}=="1", \
+	    ATTR{queue/scheduler}="bfq"
+	
+	# SD/eMMC storage.
+	ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", \
+	    KERNEL=="mmcblk*", \
+	    ATTR{queue/scheduler}="bfq"
+	
+	
+	#
+	# Fast solid-state storage
+	#
+	# Kyber is a low-overhead scheduler intended for fast multiqueue devices.
+	#
+	
+	# NVMe SSDs.
+	ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", \
+	    KERNEL=="nvme*n*", \
+	    ATTR{queue/rotational}=="0", \
+	    ATTR{queue/scheduler}="kyber"
+	
+	# Non-rotational SCSI-family devices. This includes SATA SSDs as well as
+	# USB-attached SSDs and flash devices, so slow removable USB media is
+	# overridden by the following rule.
+	ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", \
+	    KERNEL=="sd*", \
+	    ATTR{queue/rotational}=="0", \
+	    ATTR{queue/scheduler}="kyber"
+	
+	# Slow/removable USB mass storage.
+	#
+	# This rule intentionally comes after the generic non-rotational sd* rule.
+	# USB SSD/NVMe enclosures normally report removable=0 and retain Kyber;
+	# removable USB flash media gets BFQ.
+	ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", \
+	    KERNEL=="sd*", SUBSYSTEMS=="usb", ATTR{removable}=="1", \
+	    ATTR{queue/scheduler}="bfq"
 [Link](https://github.com/pop-os/default-settings/pull/149)
 
-## Access Times
+### USB Disks
 
-Use `relatime` as the default mount option (this is already the kernel default since Linux 2.6.30). `relatime` only updates the access time (atime) if the previous atime is older than the modify or change time, or if the previous atime is more than 24 hours old. This reduces write overhead vs. the legacy `atime` behavior while still satisfying applications that depend on atime (e.g., tmpwatch, mutt).
+USB flash drives can have extremely slow write performance, allowing a copy dialog to disappear while data is still being written from the kernel cache. Since a user may reach for and remove the drive within roughly a second of seeing the copy complete, slow removable media should have a small per-device dirty-data limit so the outstanding write tail is kept short. This should not affect USB SSDs or NVMe storage, which should retain normal high-performance writeback behavior.
 
-For workloads that never need atime (e.g., build servers, databases), `noatime` eliminates the overhead entirely but can break some tools that depend on it. `relatime` is the safe default for a general-purpose desktop distro.
-
-##### /etc/fstab
-    # Example: ensure relatime is set (should be default, but be explicit)
-    UUID=xxx  /  btrfs  defaults,relatime,compress=zstd  0  0
+#### /etc/udev/rules.d/71-removable-writeback.rules
+	# Slow removable USB storage can accumulate a large amount of dirty data in
+	# the page cache. Limit its per-device dirty budget so userspace cannot get
+	# far ahead of the physical device.
+	#
+	# Do not change the global vm.dirty_* timers here; those would also affect
+	# high-performance storage such as NVMe.
+	
+	ACTION=="add|change", SUBSYSTEM=="block", ENV{DEVTYPE}=="disk", \
+	    KERNEL=="sd*", SUBSYSTEMS=="usb", ATTR{removable}=="1", \
+	    ATTR{bdi/max_bytes}="8388608", \
+	    ATTR{bdi/strict_limit}="1"
 
 ## Staggered Spin-Up
 
-NOTE: I had trouble with SSS and thus I believe it should be disabled.
+### /etc/kernel/cmdline
+	+="libahci.ignore_sss=1"
 
 "Some hardware implements staggered spin-up, which causes the OS to probe ATA interfaces serially, which can spin up the drives one-by-one and reduce the peak power usage. This slows down the boot speed, and on most consumer hardware provides no benefits at all since the drives will already spin-up immediately when the power is turned on."
-
-To check if SSS is being used:
-    dmesg | grep SSS
-
-To disable it, add the `libahci.ignore_sss=1` kernel parameter.
 [Arch Wiki](https://wiki.archlinux.org/title/Improving_performance/Boot_process)
 
-## USB Disks
-
-### Synchronous Writes on Slow USB Flash Drives
-USB flash drives have extremely slow random write performance and poor wear leveling. When the kernel's writeback cache fills and flushes to a slow USB stick, the system can appear to hang. Options:
-* Set shorter dirty writeback timeouts for removable devices via udev rules
-* Consider adding `sync` mount option for USB sticks (trades throughput for data safety)
-* Use `udisks2` settings to mount removable media with `flush` option (FAT-specific, flushes after each write)
-
-##### /etc/udev/rules.d/11-usb-dirty-writeback.rules
-    # Reduce dirty writeback interval for USB storage to 5 seconds
-    ACTION=="add|change", SUBSYSTEM=="block", ATTRS{removable}=="1", ATTR{bdi/max_ratio}="1"
-
-### TRIM over USB for External SSDs
-Many USB-attached SSDs support TRIM/UNMAP via UAS (USB Attached SCSI). Ensure the device is detected as UAS rather than BOT (Bulk-Only Transport):
-    lsusb -t   # Check for "Driver=uas"
-
-Enable periodic TRIM for external SSDs:
+## TRIM Timer
     sudo systemctl enable --now fstrim.timer
 
+Note: Many USB-attached SSDs support TRIM/UNMAP via UAS (USB Attached SCSI). Ensure the device is detected as UAS rather than BOT (Bulk-Only Transport):
+    lsusb -t   # Check for "Driver=uas"
 Note: Some USB-SATA bridges do not pass through TRIM commands. Check with `lsblk --discard` — non-zero values in DISC-GRAN and DISC-MAX columns indicate TRIM support.
 
 ## /tmp on tmpfs
@@ -69,6 +97,16 @@ Recommendation: Keep /tmp on tmpfs (systemd default) but set a size limit:
 
 If the distro's target workloads involve large temp files (e.g., video encoding), consider disabling tmpfs for /tmp:
     sudo systemctl mask tmp.mount
+
+## Access Times
+
+Use `relatime` as the default mount option (this is already the kernel default since Linux 2.6.30). `relatime` only updates the access time (atime) if the previous atime is older than the modify or change time, or if the previous atime is more than 24 hours old. This reduces write overhead vs. the legacy `atime` behavior while still satisfying applications that depend on atime (e.g., tmpwatch, mutt).
+
+For workloads that never need atime (e.g., build servers, databases), `noatime` eliminates the overhead entirely but can break some tools that depend on it. `relatime` is the safe default for a general-purpose desktop distro.
+
+### /etc/fstab
+    # Example: ensure relatime is set (should be default, but be explicit)
+    UUID=xxx  /  btrfs  defaults,relatime,compress=zstd  0  0
 
 ## Optimal Encryption Sector Size
 
