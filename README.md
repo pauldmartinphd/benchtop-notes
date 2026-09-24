@@ -1,7 +1,7 @@
 # TechniComp Benchtop Linux — Design Notes
 
 Working design and reference notes for **TechniComp Benchtop Linux**, an openSUSE
-**Slowroll** derivative for supported benchtop/laptop hardware — an immutable,
+**Tumbleweed** derivative for supported benchtop/laptop hardware — an immutable,
 transactional GNOME desktop with two deliberate departures from stock Aeon: a
 verbatim upstream kernel.org **LTS kernel** and **GNOME held at old-stable
 (n−1)**, both delivered via OBS, with Flatpak for GUI apps and Homebrew for CLI
