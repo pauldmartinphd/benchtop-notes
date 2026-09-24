@@ -64,12 +64,12 @@ A single webhook is added under TechnicompLabs -> Settings -> Webhooks, using th
 - Secret: `<secret>`
 - Event: push
 
-Each repository contains a `.obs/workflows.yml` naming its own project and package:
+Each repository contains a `.obs/workflows.yml` naming its own project and package. The `trigger_services` step makes the Build Service retrieve the pushed commit before it builds; `rebuild_package` would only rebuild the source it already holds:
 
 ```yaml
 rebuild_on_push:
   steps:
-    - rebuild_package:
+    - trigger_services:
         project: <project>
         package: <package>
   filters:
