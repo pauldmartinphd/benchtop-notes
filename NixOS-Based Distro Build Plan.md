@@ -4,7 +4,7 @@
 
 Cross-references: *Patching Research Plan.md* (which already cites this document by name), *System Core/Distro Vision.md*, and the per-domain notes cited throughout §5. Facts asserted in this plan were verified live today unless explicitly marked UNVERIFIED; the ledger is §10.
 
-> **Status (added 2026-08-15):** This plan is now the **long-term architecture target**, not the active build track. Per the 2026-08-15 decision ("Slowroll now, Maybe NixOS later"), v1 ships as an openSUSE derivative — **TechniComp Benchtop Linux**, since built on Tumbleweed rather than Slowroll (see *Build Configuration.md*) — retaining both boring-core pillars (upstream kernel.org LTS kernel; GNOME old-stable) via first-party OBS projects. Plan of record: `tc-benchtop-linux/docs/build-plan.md` (its §8 relates the two tracks). Re-evaluation checkpoint with real maintenance-cost data: M4, December 2026. Nothing below has been rewritten; the §7 phase dates are stale.
+> **Status (added 2026-08-15):** This plan is now the **long-term architecture target**, not the active build track. Per the 2026-08-15 decision ("Slowroll now, Maybe NixOS later"), v1 ships as an openSUSE derivative — **Technicomp Benchtop Linux**, since built on Tumbleweed rather than Slowroll (see *Build Configuration.md*) — retaining both boring-core pillars (upstream kernel.org LTS kernel; GNOME old-stable) via first-party OBS projects. Plan of record: `tc-benchtop-linux/docs/build-plan.md` (its §8 relates the two tracks). Re-evaluation checkpoint with real maintenance-cost data: M4, December 2026. Nothing below has been rewritten; the §7 phase dates are stale.
 
 ---
 
