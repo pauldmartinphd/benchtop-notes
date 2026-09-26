@@ -1,6 +1,6 @@
 # Technicomp Benchtop Linux — design notes
 
-Benchtop Linux is a GNOME workstation built on openSUSE Tumbleweed, with an immutable base updated through transactional-update. The design keeps the development tools and applications current while taking a more conservative approach to the kernel and desktop: an upstream kernel.org LTS kernel and GNOME’s old stable release (n−1). Flatpak provides GUI applications and Homebrew provides additional CLI tools.
+Benchtop Linux is a GNOME workstation built on openSUSE Tumbleweed, with an immutable base updated through transactional-update. The design keeps the development tools and applications current while taking a more conservative approach to the kernel and desktop: an upstream kernel.org LTS kernel and GNOME’s old stable release (n−1). GNOME Software is the application manager, with Flatpak for GUI applications and Homebrew for additional CLI tools. Planned AppImage support adds an AppImage backend and AppImageHub integration to GNOME Software, with per-user installation under `~/Applications/` and generated desktop launchers.
 
 These notes record the design, configuration choices, experiments, and unresolved questions. [Build Configuration](Build%20Configuration.md) describes the working Tumbleweed/OBS image and its source repositories. It also identifies work still needed for the custom kernel and GNOME release policy; those design goals should not be read as completed build features.
 

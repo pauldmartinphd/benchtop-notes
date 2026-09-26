@@ -188,7 +188,11 @@ Compare their behavior with the selected GNOME and KDE applications before addin
 * OmniFocus → Planify (https://github.com/alainm23/planify) — GTK4/libadwaita task manager with Todoist sync
 * OmniGraffle → Dia (basic), yEd (free but not open source), or draw.io / diagrams.net (Electron app / web-based). For a native option, consider Minder (https://github.com/phase1geo/Minder) for mind maps, or simply use Inkscape for more complex diagrams.
 
-## App Installation Tools
+## App installation
+
+Use GNOME Software for Flatpak and the planned AppImage backend, including AppImageHub discovery. AppImages install in `~/Applications/` with generated `.desktop` entries. Bazaar is not needed. See [Application management](../System%20Core/Pre-Packaged%20Environment.md#application-management) for the intended behavior.
+
+The links below are implementation references and earlier candidates, not a list of additional stores to ship:
 
 * https://github.com/linuxmint/webapp-manager
 * https://www.appimagehub.com/

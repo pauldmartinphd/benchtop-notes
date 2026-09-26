@@ -39,7 +39,7 @@ The original list grouped these under Flatpak, but their delivery method is not 
 * SD Memory Card Formatter for Linux
 * RStudio
 * Nautilus w/ Sushi
-* GNOME Software
+* GNOME Software — selected application manager; an AppImage backend and AppImageHub integration are planned (see [Application management](../System%20Core/Pre-Packaged%20Environment.md#application-management))
 
 ## Zypper: Automatically Remove Orphaned Packages
 

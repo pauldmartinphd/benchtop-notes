@@ -5,15 +5,23 @@
 * yq: command-line YAML, JSON, XML, CSV and properties processor — https://github.com/mikefarah/yq
 * pandoc: command-line document conversion format
 
-## Flatpak Management
+## Application management
 
-* Bazaar Application Store
-* Warehouse for Flatpak management
-* Flatseal (permissions manager)
+GNOME Software is the application manager. Bazaar is not needed. Retain Warehouse for Flatpak management and Flatseal for permissions management.
+
+### AppImage backend and AppImageHub
+
+GNOME Software needs an AppImage backend with AppImageHub integration so that users can discover and install AppImages through the same interface as other applications. This is a development requirement, not a feature already implemented in the Benchtop image.
+
+Each AppImage should be installed per user in `~/Applications/`. Installation should generate a `.desktop` entry in `$XDG_DATA_HOME/applications/` (normally `~/.local/share/applications/`) so the application appears in the desktop launcher. The entry should use the application’s name and icon and point to the installed executable through an absolute path, with desktop-entry quoting rules applied. The installer should make the AppImage executable.
+
+Updates should keep the launcher pointed at the installed AppImage. Uninstalling should remove the managed AppImage and its generated launcher. The backend and catalog integration still need implementation and testing.
+
+References: [AppImageHub](https://www.appimagehub.com/) and the [Desktop Entry Specification](https://specifications.freedesktop.org/desktop-entry/latest-single/).
 
 ## Additional applications
 
-Use Flatpak for GUI applications and Homebrew for additional CLI tools. Nix is no longer under consideration.
+Use Flatpak and AppImage for GUI applications, with GNOME Software as the application manager, and Homebrew for additional CLI tools. Nix is no longer under consideration.
 
 ## Backup
 

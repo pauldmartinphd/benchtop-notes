@@ -16,7 +16,7 @@ Lower-spec hardware may work, but it is outside the design and test target. The 
 
 ## Applications and settings
 
-The current direction is Flatpak for GUI applications and Homebrew for additional CLI tools. Nix and Home Manager are no longer part of the direction; the [rejected NixOS proposal](../NixOS-Based%20Distro%20Build%20Plan.md) is retained for reference. Chezmoi remains a candidate for dotfile synchronization. GNOME state and extension synchronization need their own design, including the earlier idea of a fork of Extension Sync.
+The current direction is GNOME Software for application management, Flatpak and AppImage for GUI applications, and Homebrew for additional CLI tools. Bazaar is not part of the plan. GNOME Software needs an AppImage backend with AppImageHub integration; AppImages should install in `~/Applications/` with generated desktop launchers. The [packaged-environment note](Pre-Packaged%20Environment.md#appimage-backend-and-appimagehub) records the intended behavior. Nix and Home Manager are no longer part of the direction; the [rejected NixOS proposal](../NixOS-Based%20Distro%20Build%20Plan.md) is retained for reference. Chezmoi remains a candidate for dotfile synchronization. GNOME state and extension synchronization need their own design, including the earlier idea of a fork of Extension Sync.
 
 Provide GUI administration for low-memory conditions, the firewall, and file sharing. The terminal should have Starship configured by default. Include Solaar, libratbag support, and the udev rules needed for supported mice, game controllers, and other peripherals.
 
@@ -34,6 +34,6 @@ These are design explorations. The original list also proposed ZFS root with a l
 
 ## References and research questions
 
-Bluefin is a useful reference for providing upstream tools, including Bazaar and Homebrew, and keeping application workflows portable across distributions. See its [introduction](https://docs.projectbluefin.io/introduction), [developer environment](https://docs.projectbluefin.io/bluefin-dx), and [command-line tools](https://docs.projectbluefin.io/command-line).
+Bluefin is a reference for providing upstream tools and keeping application workflows portable across distributions. Benchtop uses GNOME Software rather than adopting Bluefin’s Bazaar choice. See its [introduction](https://docs.projectbluefin.io/introduction), [developer environment](https://docs.projectbluefin.io/bluefin-dx), and [command-line tools](https://docs.projectbluefin.io/command-line).
 
 Two questions in the original notes remain research hypotheses: whether rolling distributions deliver security fixes faster than distributions maintaining older releases, and whether language-native package managers such as pip and npm provide a better update path than distro-managed libraries. Neither should be presented as an established result of these design notes.
