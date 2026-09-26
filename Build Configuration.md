@@ -44,13 +44,12 @@ Several capabilities that the package set requires can be satisfied by more than
 
 ```
 Prefer: helm
-Prefer: valkey-compat-redis
 Prefer: plymouth-branding-openSUSE
 Prefer: openSUSE-release-appliance
 Prefer: tik-config-generic
 ```
 
-`helm` is preferred over `helm3`, the legacy name. `valkey-compat-redis` provides the `redis` capability using Valkey. `plymouth-branding-openSUSE` selects the openSUSE boot-splash branding. `openSUSE-release-appliance` selects the appliance release flavor; it is an interim choice, and the image identifies as openSUSE Tumbleweed until a dedicated `tc-benchtop-release` package is created. `tik-config-generic` selects tik's generic configuration rather than Aeon's.
+`helm` (Helm 4) is preferred over `helm3`, the Helm 3 series, which also provides `helm`. `plymouth-branding-openSUSE` selects the openSUSE boot-splash branding. `openSUSE-release-appliance` selects the appliance release flavor; it is an interim choice, and the image identifies as openSUSE Tumbleweed until a dedicated `tc-benchtop-release` package is created. `tik-config-generic` selects tik's generic configuration rather than Aeon's.
 
 The logos need no preference line, although openSUSE:Factory's own configuration prefers `distribution-logos-openSUSE-Tumbleweed`: the pattern requires `tc-benchtop-branding`, which requires `distribution-logos-tc-benchtop` by name, and the Build Service resolves such single-provider requirements before it makes any choice, so the `distribution-logos` capability is already provided when a choice would arise.
 
