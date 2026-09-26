@@ -1,7 +1,10 @@
 # Drivers and Firmware
 
+The lists below describe the intended hardware and format coverage. Package commands are working references and still need to resolve against the image’s selected repositories.
+
 ## Goal
 Complete driver packaging and firmware built-in:
+
 * Printers, Scanners, GPU, WiFi, Function Keys
 * Proprietary drivers built-in
 * Proprietary firmware built-in
@@ -12,6 +15,7 @@ Complete driver packaging and firmware built-in:
 Ensure hardware-accelerated decoding (VA-API / VDPAU) and all common software codecs are pre-installed.
 
 ### Hardware Acceleration
+
     # Intel (recent):
     sudo zypper install intel-media-driver     # iHD driver (Broadwell+)
     # Intel (legacy):
@@ -22,20 +26,23 @@ Ensure hardware-accelerated decoding (VA-API / VDPAU) and all common software co
     # NVDEC/NVENC provided by the proprietary driver
 
 ### Software Codecs (from Packman repo)
+
     sudo zypper install ffmpeg gstreamer-plugins-bad gstreamer-plugins-ugly gstreamer-plugins-libav
     sudo zypper install libavcodec-full        # All ffmpeg codecs including non-free (h264, h265, AAC)
     sudo zypper install x264 x265 libvpx libdav1d
 
 Key codec coverage:
+
 * **H.264/AVC** — Universal web video, Blu-ray (x264 encoder, openh264 decoder)
 * **H.265/HEVC** — 4K streaming, modern cameras (x265 encoder)
 * **VP9** — YouTube, WebRTC (libvpx)
-* **AV1** — Next-gen open codec; YouTube, Netflix (dav1d decoder, SVT-AV1 or rav1e encoder)
+* **AV1** — Open video codec; YouTube, Netflix (dav1d decoder, SVT-AV1 or rav1e encoder)
 * **AAC** — Standard audio codec (fdkaac for high quality, or ffmpeg's built-in)
 * **FLAC, Vorbis, Opus** — Open audio codecs (included in base gstreamer)
-* **AC3/DTS** — Surround sound for movies (a]52dec, libdca)
+* **AC3/DTS** — Surround sound for movies (a52dec, libdca)
 
 ### Verification
+
     vainfo                    # Check VA-API support
     vdpauinfo                 # Check VDPAU support (NVIDIA)
     gst-inspect-1.0 | grep -i "264\|265\|av1\|vp9"   # Check GStreamer codec availability
@@ -45,11 +52,12 @@ Key codec coverage:
     sudo zypper install libjpeg-turbo libpng libtiff libwebp libheif libavif libraw libJXL
 
 Key format coverage:
-* **JPEG/JPEG XL** — Standard photos, next-gen replacement (libjpeg-turbo, libJXL)
+
+* **JPEG/JPEG XL** — Photo formats (libjpeg-turbo, libJXL)
 * **PNG** — Lossless screenshots, graphics (libpng)
 * **WebP** — Web images (libwebp)
 * **HEIF/HEIC** — Apple photos format (libheif — requires HEVC decoder)
-* **AVIF** — AV1-based image format, superior compression (libavif)
+* **AVIF** — AV1-based image format (libavif)
 * **TIFF** — Professional/scientific imaging (libtiff)
 * **RAW** — Camera raw formats (libraw — covers CR2, NEF, ARW, DNG, etc.)
 * **SVG** — Vector graphics (librsvg, built into GTK)
@@ -58,6 +66,7 @@ Key format coverage:
 Verify Nautilus/Gwenview can generate thumbnails for all formats after installation.
 
 ## Hardware-Specific Tools
+
 * [OpenRGB](https://openrgb.org/) — RGB lighting control
 * [OpenRazer](https://openrazer.github.io/) — Razer peripheral support
 * [linux-surface](https://github.com/linux-surface) — Microsoft Surface support
@@ -67,6 +76,7 @@ Verify Nautilus/Gwenview can generate thumbnails for all formats after installat
 * [t2linux](https://t2linux.org/) — Apple T2 Mac support
 
 ## Core Components
+
 * OpenRGB-udev-rules
 * rasdaemon
 
@@ -76,10 +86,12 @@ Verify Nautilus/Gwenview can generate thumbnails for all formats after installat
 Add users to systemd-journal group on creation
 
 ### Hardware Monitoring
+
     sudo systemctl enable --now smartd
     sudo systemctl enable --now rasdaemon
 
 ### Performance Monitoring Tools
+
 * htop
 * iotop-c
 * nvtop

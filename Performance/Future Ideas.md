@@ -1,3 +1,7 @@
+# Future performance experiments
+
+These tools and optimization ideas need evaluation; they are not selected defaults. The gaming-session settings are in [Gaming Mode](Gaming%20Mode.md).
+
 ## Performance Tools and Applications
 
 * [GameMode](https://github.com/FeralInteractive/gamemode/) — Feral Interactive's on-demand game optimizer
@@ -23,7 +27,7 @@
 
 [BOLT](https://github.com/llvm/llvm-project/tree/main/bolt) is a post-link binary optimizer from Meta (now part of LLVM). It uses hardware performance counters (perf data) to rearrange the code layout of already-compiled binaries for better instruction cache utilization and branch prediction. Unlike PGO (which requires recompilation), BOLT operates on final binaries.
 
-Potential use: Profile the distro's critical binaries (systemd, GNOME Shell, Mesa, kernel) and optimize their layout. CachyOS uses a similar technique with AutoFDO for the kernel. BOLT can provide 5-15% speedups on hot code paths.
+Potential use: Profile the distro's critical binaries (systemd, GNOME Shell, Mesa, kernel) and optimize their layout. CachyOS uses a similar technique with AutoFDO for the kernel. The earlier notes cite 5–15% speedups, but contain no Benchtop measurement supporting that range.
 
 Workflow:
 1. Build the binary with relocations preserved (`-Wl,--emit-relocs`)
@@ -37,23 +41,4 @@ Workflow:
 
 This is only relevant if the distro targets ARM64 hardware. FEX is comparable to Apple's Rosetta 2 but for Linux. It supports running Steam, Wine/Proton, and many native x86 Linux applications on ARM.
 
-Note: FEX does not emulate x86 on x86 — it is strictly an AArch64-to-x86 translation layer. For x86-on-x86, native execution is used.
-
-
-# Gaming Mode
-
-## Game Mode THP Settings
-
-Transparent Hugepages (THP) have the kernel allocate memory pages in **2MiB** or 2GiB units instead of 4KiB units as is the platform default on X86. This has been shown to measurably improve gaming performance in many cases. The risk for enabling this is low, as some distros do this by default (such as OpenSUSE). It is also a kernel tunable that can be set at runtime using sysctl.
-
-Proposal: enable THP and disable proactive compaction for gaming sessions, restore to defaults when the session ends (some workloads such as databases can be negatively impacted by memory fragmentation).
-
-Enable when gaming, restore when game ends:
-    echo always | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
-    echo advise | sudo tee /sys/kernel/mm/transparent_hugepage/shmem_enabled
-    echo 0 | sudo tee /proc/sys/vm/compaction_proactiveness
-    echo 0 | sudo tee /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
-
-See [Steam Deck Utilities](https://github.com/CryoByte33/steam-deck-utilities/blob/main/docs/tweak-explanation.md)
-See [THP Gaming Performance](https://blog.patshead.com/2023/02/enabling-transparent-hugepages-can-provide-huge-gaming-performance-improvements.html)
-See [Measuring THP Impact](https://alexandrnikitin.github.io/blog/transparent-hugepages-measuring-the-performance-impact/)
+FEX runs x86/x86-64 applications on an AArch64 host. It is relevant only if Benchtop targets that host architecture.

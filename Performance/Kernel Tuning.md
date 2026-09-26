@@ -1,12 +1,18 @@
+# Kernel tuning
+
+The runtime settings below retain the September 16 corrections. Compile-time choices and alternative kernel projects are recorded separately from those settings. The `+` markers in the command-line notes mean “append this parameter”; they are not literal kernel arguments. `sdbootutil update-all-entries` is a command to run after editing, not part of the command line.
+
 ## Preemption
 
 ### /etc/kernel/cmdline
+
     +"preempt=full"
 
-#### 2024-09-07 Note (RESOLVED): PREEMPT_RT merged into mainline Linux 6.12 (Nov 2024)
-PREEMPT_RT is now available in mainline. For kernels 6.12+, consider using `preempt=full` with the RT patches enabled rather than just `preempt=full` on a non-RT kernel. This should be the preferred configuration for a desktop distro.
+### Full preemption and PREEMPT_RT
 
-Full/rt vs. voluntary preemption can cause a significant degradation in throughput. But Context from the original discussion minimizes the concern:
+The earlier note favors evaluating PREEMPT_RT for desktop latency. Keep that proposal distinct from the selected `preempt=full` boot parameter: full preemption does not turn a non-RT kernel into a PREEMPT_RT build. The kernel configuration and driver compatibility need to be considered separately. See the [kernel parameter reference](https://www.kernel.org/doc/html/latest/admin-guide/kernel-parameters.html) and [PREEMPT_RT theory of operation](https://www.kernel.org/doc/html/next/core-api/real-time/theory.html).
+
+Full and real-time preemption may trade throughput for latency. The original discussion argued that the tradeoff could be worthwhile; the following is a quoted opinion, not a Benchtop benchmark:
 "It should be the default in distributions. Exceptions might be worth evaluating for server-specific kernels, but even then I suspect they would find that the throughput penalty is not large enough to make it worth disabling.
 
 Without PREEMPT_RT, nevermind forcibly large audio buffers, Linux hiccups are so severe they can even be visible as on-screen stutter.
@@ -24,6 +30,7 @@ rtkit-daemon (RealtimeKit) is a D-Bus system service that allows user processes 
 ## Interrupts
 
 ### /etc/kernel/cmdline
+
     +="threadirqs"
     +="rcu_nocbs=all"
     +="rcutree.enable_rcu_lazy=1"
@@ -31,16 +38,19 @@ rtkit-daemon (RealtimeKit) is a D-Bus system service that allows user processes 
 [Link](https://lwn.net/Articles/931920/)
 
 ### Enable IRQ Balancing
+
 	systemctl enable --now irqbalance.service
 
 ## Watchdog
 
 ##### /etc/kernel/cmdline
+
     +="nowatchdog"
     +="nmi_watchdog=0"
       sdbootutil update-all-entries
-      
+
 ##### /etc/modprobe.d/blacklist.conf
+
     # Blacklist the Intel TCO Watchdog
 	blacklist iTCO_wdt
 
@@ -50,6 +60,7 @@ rtkit-daemon (RealtimeKit) is a D-Bus system service that allows user processes 
 ## Split Lock Mitigate
 
 ### /etc/sysctl.d/30-splitlock.conf
+
     kernel.split_lock_mitigate = 0
 
 In some cases, split lock mitigate can slow down performance in some applications and games.  So we turn it off
@@ -65,13 +76,14 @@ https://github.com/ublue-os/packages/tree/main/packages/ublue-os-udev-rules/src/
 
 ## Tick Rate
 
-CONFIG_HZ=1000 — the only option that is *only* tunable at compile time. There is a potential risk of regressions for CPU-intensive applications, but they can be mitigated (and maybe even outperformed) with NO_HZ_FULL. On the other hand, HZ=1000 can improve system responsiveness — most desktop and server applications benefit from this (the largest part of server workloads is I/O bound, more than CPU-bound, so they benefit from a kernel that can react faster at switching tasks), not to mention the benefit for typical end user applications (gaming, live conferencing, multimedia, etc.).
+`CONFIG_HZ=1000` is a proposed compile-time choice for responsiveness. The original rationale also suggested evaluating `NO_HZ_FULL` to limit throughput costs. Compare scheduling latency, desktop frame times, and CPU-intensive throughput before attributing a benefit to either setting; the notes contain no Benchtop measurements establishing one.
 
 --
 
 ## CachyOS Kernel Reference
 
-CachyOS Kernel:
+The following list was collected as a reference for possible experiments, not as a Benchtop patch set or a verified inventory of the current CachyOS kernel:
+
 * Uses the BORE scheduler
 * Built with clang and ThinLTO
 * Profiled with AutoFDO
@@ -88,6 +100,7 @@ CachyOS Kernel:
 * Various other patches (optimized compiler flags, cryptographic improvements, memory management tweaks)
 
 Architecture targets:
-* x86-64-v3: 5%-20% performance uplift compared to x86-64
+
+* x86-64-v3: the source notes cite 5–20% over x86-64; no Benchtop measurement is recorded
 * x86-64-v4: Substantial performance gains through AVX512 support (workload-dependent)
 * Zen 4/5: x86-64-v4 instruction set plus additional extensions

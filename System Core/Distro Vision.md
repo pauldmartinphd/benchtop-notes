@@ -1,171 +1,39 @@
-# Distro Vision
+# Distro vision
 
-## Core Principles
-* Immutable base OS with simplified core
-* Rolling release for fast security patches
-* Drop legacy dependencies (GTK2, Python2)
-* Userspace-only support for legacy filesystems and file sharing protocols
-* Complete driver and firmware packaging built-in (GPU, WiFi, printers, scanners, function keys)
-* Proprietary drivers and firmware included
+Benchtop is intended to be a complete technical workstation: an immutable base with the drivers, firmware, development tools, and desktop integration needed for ordinary work already configured. The active build uses openSUSE Tumbleweed. The kernel and GNOME are intended to follow upstream-maintained releases more conservatively than the rest of the system: kernel.org LTS and GNOME old stable (n−1). [Build Configuration](../Build%20Configuration.md) records what is implemented and what remains to be built.
 
-## Subsystems
-* Windows (compatibility layer)
-* Android (Waydroid)
+The base should be small enough to understand and maintain, without requiring users to assemble basic hardware support themselves. That includes GPU and Wi-Fi drivers, printer and scanner support, function keys, and proprietary drivers or firmware where needed. Remove obsolete dependencies such as GTK2 and Python 2 where the supported application set allows it. Prefer userspace implementations for legacy filesystems and file-sharing protocols.
 
-## Package Management
-* Nix for CLI packages
-* FlatPak for GUI packages
+## Supported hardware baseline
 
-## Settings Sync
-* Home Manager (Nix) or chezmoi (git) for dotfiles sync
-* Fork of Extension Sync for GNOME state
+The minimum design and test target is:
 
-## Desktop Administration
-* Linux OOM/Low Mem GUI
-* Linux Firewall GUI (Advanced/Configurable)
-* File Sharing GUI
+* 16 GB RAM
+* A quad-core CPU supporting x86-64-v3
+* A 1920 × 1080 display
 
-## Distro Configured Use Cases
-* Machine Learning (CUDA, ROCm)
-* Data Science
-* Virtualization (KVM, libvirt; GUI: Virt-Manager, Boxes; Web: Incus)
-* Software Development (Git, Podman, Kubernetes; GUI: Podman Desktop)
-* System Administration (Cockpit, Distrobox/Distrosheff)
-* Gaming
-* Audio and Multimedia
+Lower-spec hardware may work, but it is outside the design and test target. The project does not aim to make this workstation environment suitable for very limited hardware.
 
-## Quality of Life
-* Starship terminal prompt enabled by default
-* Solaar — included for managing Logitech mice along with libratbagd
-* Extra udev rules for game controllers and other devices out of the box
+## Applications and settings
 
-## Inspiration
-"Bluefin specifically ships upstream tools in lieu of custom applications. The idea of a 'distribution app store' has proven to be unsustainable for desktop application authors, so Bluefin ships tools like Bazaar and Homebrew instead. Additionally the team purposely ensures that the workflows used in Bluefin remain not only distribution agnostic, but operating system agnostic."
+The current direction is Flatpak for GUI applications and Homebrew for additional CLI tools. Nix and Home Manager are no longer part of the direction; the [rejected NixOS proposal](../NixOS-Based%20Distro%20Build%20Plan.md) is retained for reference. Chezmoi remains a candidate for dotfile synchronization. GNOME state and extension synchronization need their own design, including the earlier idea of a fork of Extension Sync.
 
-* https://docs.projectbluefin.io/introduction
-* https://docs.projectbluefin.io/bluefin-dx
-* https://docs.projectbluefin.io/command-line
+Provide GUI administration for low-memory conditions, the firewall, and file sharing. The terminal should have Starship configured by default. Include Solaar, libratbag support, and the udev rules needed for supported mice, game controllers, and other peripherals.
 
-## Modern Linux Filesystem Philosophy
+## Intended work
 
-* Everything is really a file
-* Text format for all personal data; greppable
-* Tag-based FS Tags cross-platform into virtual folders
-    * Implement tags using hard links so a vnode with two links is given two "tags" in Dolphin
-    * Look into ZFS hard link and tag support
-* ZFS root distributed with low latency kernel
-* Subvolume for /home or /home on separate array
-* No support for distributed /
-* Fix Linux Kernel in ESP
-* Toggle for "Cross-platform" or "Next Generation" support for /home:
-    * Cross-platform: No hard links, case insensitive FS, limited filename character set, full POSIX
-    * Single Platform: Tags via hard links, case sensitive FS, full filename character set, ignore POSIX
-* Do we need all file metadata attributes? Can we simply record last file modification time (or creation time if not modified)?
+The system should support machine learning with CUDA and ROCm, data science, software development, virtualization, system administration, gaming, and audio and multimedia work. The notes identify Git, Podman, Kubernetes, Podman Desktop, KVM/libvirt, virt-manager, Boxes, Incus, Cockpit, and Distrobox/Distrosheff as relevant tools. These use cases guide package selection; their presence here does not settle which applications belong in the base image.
 
-## Linux Patching Research
-* Theory: rolling release patches security bugs faster than forked LTS
-* Theory: pip/npm better than distro-managed libraries
+Windows compatibility and Android through Waydroid are also intended capabilities. The [application list](../Applications/Application%20List.md) and [packaged environment](Pre-Packaged%20Environment.md) keep the candidate tools separate from the build description.
 
+## Filesystem ideas
 
----
+Several earlier ideas go beyond the active image: searchable text formats for personal data; tags represented through hard links and virtual folders; a separate `/home` subvolume or array; and a clearer filesystem hierarchy. The notes also consider two modes for home storage: cross-platform compatibility with restricted names and case-insensitive behavior, or a single-platform mode with tags, case-sensitive names, and fewer portability constraints. Whether all file metadata is needed, rather than creation and modification times alone, remains a question.
 
-## From legacy notes: Immutable Distro Vision.md
+These are design explorations. The original list also proposed ZFS root with a low-latency kernel, keeping the kernel in the ESP, and no distributed root filesystem. The active image instead has a Btrfs read-only-snapshot layout. The [filesystem note](Filesystems.md) retains the alternatives without treating them as implemented decisions.
 
-# Subsystems
-* Windows
+## References and research questions
 
-# Security
-  * Rolling Release Patches
-  * Userspace-only Support for
+Bluefin is a useful reference for providing upstream tools, including Bazaar and Homebrew, and keeping application workflows portable across distributions. See its [introduction](https://docs.projectbluefin.io/introduction), [developer environment](https://docs.projectbluefin.io/bluefin-dx), and [command-line tools](https://docs.projectbluefin.io/command-line).
 
-# Filesystems:
-Base Filesystem COW w/ Snapshots
-	bcachefs
-
-# Pre-Packaged Environment
-Configure Compression and Filesystem Format Support
-    1.  Compression
-        sudo dnf install cabextract lha arj lzip unrar pax p7zip p7zip-plugins p7zip-doc sharutils unzix unace xar xdms xz
-    2.  Filesystems
-        sudo dnf install dmg2img simg2img fuse-exfat exfat-utils squashfuse squashfs-tools zfs-fuse fuse-afp fuse9p squashfuse orangefs-fuse fuse-sshfs fuse-dislocker fuse-encfs
-          NTFS (FUSE)
-          EXFAT (FUSE
-          FAT32 (FUSE)
-          HFS+ (FUSE)
-          APFS (FUSE https://github.com/linux-apfs)
-          Android Adoptable Storage (https://nelenkov.blogspot.com/2015/06/decrypting-android-m-adopted-storage.html)
-          Samsung Encrypted SD Card ?
-          BitLocker ?
-          FileVault ?
-    3.  yq: command-line YAML, JSON, XML, CSV and properties processor
-          https://github.com/mikefarah/yq
-    4.  pandoc: command-line document conversion format
-    5.  Video Codecs
-    6.  Image Formats
-
-# Fonts
-Infinality Font Rendering
-ClearType Fonts
-Microsoft TTF Support (and default for OpenOffice)
-
-# Modernized UNIX Protocols?
-  Bonjour Service Dsicovery: Avahi
-  Syncthing (In-Network Data Exchange)
-  Cryptomator Cloud Encryption
-  LUKS Volume Encryption
-  Nextcloud
-  Localsend
-  SMB3 File Sharing (Considering whether to modify for lowest common denominator or highest)
-	*	Driverless AirPrint/IPP/WSD Printing/Scanning (CUPS/SANE)
-	*	RDP low latency replacement - moonlight?
-	*	ZFS: https://www.poolsman.com/
-
-# Audio Cues
-  Any delayed response/action
-  Drag and drop/file copy
-  File download
-  Empty trash
-  Action not allowed
-    E.g. click outside box when input required
-  https://utcc.utoronto.ca/~cks/space/blog/linux/SystemSoundsShouldBeGranular
-
-# Drivers
-Complete Driver Packaging and Firmware Built-In
-	Printers, Scanners, GPU, WiFi, Function Keys
-	Proprietary Drivers built-in
-	Proprietary Firmware built-in
-	Optimus/Dynamic GPU Support
-
-
----
-
-## From legacy notes: Linux Distro Ideas.md
-Distro Configured Uses:
-	Machine Learning
-	Data Science
-	Virtualization
-	  GUI: Virt-Manager; Boxes
-	  Web (Incus)
-	Software Development
-	  Kubernetes
-	  GUI: Podman Desktop
-	System Administration
-	  Distrobox/Distrosheff
-	Audio and Multimedia
-	  Flatpak (Consider)
-	    Bazaar Application Store
-	    Warehouse for Flatpak management
-	    Flatseal
-		Consider as Per-user application environment; instead of distrobox
-		    “Bluefin specifically ships upstream tools in lieue of custom applications. The idea of a "distribution app store" has proven to be unsustainable for desktop application authors, so Bluefin ships tools like Bazaar and Homebrew instead. Additionally the team purposely ensures that the workflows used in Bluefin remain not only distribution agnostic, but operating system agnostic. For example, podman, docker, and flatpak instead of distribution specific tooling, etc.”
-Tailscale Integrate with NetworkManager
-rclone - mount nearly any remote storage service onto your local machine, great for multi-machine setups
-restic - A modern backup program for your files
-** Quality of Life Features **
-Starship terminal prompt enabled by default
-Solaar - included for managing Logitech mice along with libratbagd
-Extra udev rules for game controllers and other devices included out of the box
-https://docs.projectbluefin.io/introduction
-https://docs.projectbluefin.io/bluefin-dx
-https://docs.projectbluefin.io/command-line
-Modern Filesystem Hierarchy
+Two questions in the original notes remain research hypotheses: whether rolling distributions deliver security fixes faster than distributions maintaining older releases, and whether language-native package managers such as pip and npm provide a better update path than distro-managed libraries. Neither should be presented as an established result of these design notes.

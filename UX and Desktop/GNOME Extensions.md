@@ -1,6 +1,8 @@
 # GNOME Extensions
 
-## Installed
+## Recorded extension set
+
+This was labeled “Installed” in the combined notes. It describes the working desktop selection, not a verified manifest of the Benchtop image. Entries marked “consider” remain candidates.
 
 ### Alphabetical App Grid
 
@@ -10,24 +12,25 @@
 https://extensions.gnome.org/extension/6670/bluetooth-battery-meter/
 
 ### Blur My Shell
+
 * https://github.com/aunetx/blur-my-shell/issues/455
 * https://github.com/aunetx/blur-my-shell/issues/757
 
 ### Coverflow Alt-tab
+
 * https://github.com/dsheeler/CoverflowAltTab/issues/13
 
 ### Dash to Dock
+
 * Launch Feedback: https://github.com/micheleg/dash-to-dock/issues/49
     * https://github.com/home-sweet-gnome/dash-to-panel/issues/2218
 * https://github.com/micheleg/dash-to-dock/pull/574
 * https://github.com/micheleg/dash-to-dock/issues/1029
 https://extensions.gnome.org/extension/8640/dynamic-calendar-clocks-and-weather-icons-reborn/
 
-##### Feature Merging
-Dash to Dock
-Dash to Panel
-Dynamic icons
-Dash2Dock Animated
+### Dock integration idea
+
+Consider combining the desired behavior of Dash to Dock, Dash to Panel, dynamic icons, and Dash2Dock Animated. The list records an integration idea rather than a decision to run all four together.
 
 ### GTK4 Desktop Icons Next Generation (DING)
 Include but toggle off by default.
@@ -36,12 +39,14 @@ Include but toggle off by default.
 https://extensions.gnome.org/extension/1319/gsconnect/
 
 ### Just Perfection
+
 * Click to Close Overview (replaces click-to-close-overview@l3nn4rt.github.io)
 * Restore Desktop Thumbnails (replaces GNOME 4X UI Improvements)
 
 ### Pano (Clipboard Manager)
 
 ### Rounded Window Corners Reborn
+
 * Unround the bottom corners (not currently possible)
 * Corner radius of 15 for consistency between GTK3 and libadwaita
 * https://github.com/flexagoon/rounded-window-corners/issues/36
@@ -51,14 +56,17 @@ https://extensions.gnome.org/extension/1319/gsconnect/
 ### Quick Settings Tweaks
 
 ### Search Light
+
 * Consider
 * Integrate with Blur My Shell
 
 ### Tiling Shell
+
 * Switch desktop while dragging and hovering on screen edge
 * Switch desktops with keyboard while dragging
 
 ### Transparent Window Moving
+
 * Switch desktop while dragging and hovering on screen edge
 * Switch desktops with keyboard while dragging
 
@@ -67,6 +75,7 @@ https://extensions.gnome.org/extension/1319/gsconnect/
 ### Weather o'Clock
 
 ## Under Consideration
+
 * Caffeine (caffeine@patapon.info)
 * Clipboard Indicator (clipboard-indicator@tudmotu.com)
 * AlphabeticalAppGrid@stuarthayhurst

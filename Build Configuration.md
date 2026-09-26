@@ -101,8 +101,6 @@ The image resolves against a single tested Tumbleweed snapshot, so the whole pac
 
 When a package requires a capability that several packages provide, the build fails with "have choice" until a `Prefer` line selects one. This is expected, and is not a missing-package error.
 
-Commit messages contain no co-author or tooling attribution.
-
 ## Current state
 
-The image resolves cleanly against `openSUSE:Factory/snapshot` and builds. Remaining work, in rough order: a `tc-benchtop-release` package to give the system its own identity in place of `openSUSE-release-appliance`; a custom kernel; and, if a slower GNOME is wanted, pinning the build to a fixed Tumbleweed snapshot and advancing it deliberately.
+The image resolves cleanly against `openSUSE:Factory/snapshot` and builds. Remaining work, in rough order: a `tc-benchtop-release` package to give the system its own identity in place of `openSUSE-release-appliance`; a custom kernel; and implementing the GNOME old stable (n−1) policy. Pinning the whole Tumbleweed snapshot was noted as an interim option, but it also holds back the rest of the package set; it does not by itself implement a separately maintained GNOME branch.

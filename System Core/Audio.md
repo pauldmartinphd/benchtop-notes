@@ -4,23 +4,19 @@
 
 PipeWire is the default audio/video server replacing both PulseAudio and JACK. It handles Bluetooth audio codecs, screen sharing (for Wayland), and pro-audio routing.
 
-### Non-free Bluetooth Codecs
-By default, PipeWire only includes open codecs (SBC, SBC-XQ). For high-quality Bluetooth audio, install non-free codec support:
+### Bluetooth codecs
 
-    # OpenSUSE (from OBS pipewire-nonfree-codecs package — see OpenSUSE Configuration)
+The goal is to include the codec support needed by the supported headsets. The notes list SBC/SBC-XQ, AAC, aptX variants, LDAC, and LC3/LC3plus for evaluation. Availability depends on the PipeWire build, session-manager configuration, Bluetooth transport, and both devices; installing one package does not establish support for every codec.
+
+The proposed openSUSE package is `pipewire-nonfree-codecs`. Confirm its contents against the image build rather than treating “non-free codecs” as a complete capability list.
+
     sudo zypper install pipewire-nonfree-codecs
 
-This enables:
-* **AAC** — Required for Apple devices (AirPods, etc.). Licensing prevents inclusion in base repos.
-* **aptX / aptX HD / aptX Adaptive** — Qualcomm's low-latency Bluetooth codecs. Common on Android devices and many Bluetooth headphones.
-* **LDAC** — Sony's high-resolution Bluetooth codec. Note: LDAC is actually open-source (Apache 2.0) and may already be included in base PipeWire.
-* **LC3/LC3plus** — Bluetooth LE Audio codec (part of the LE Audio/Auracast spec). This is the future standard and is royalty-free.
+For inspection, retain the existing command as a starting point:
 
-To verify active Bluetooth codec:
     pw-cli info all | grep -A 10 bluez
 
-To check which codecs are available:
-    spa-acp-tool list-codecs
+Check the active device and stream properties, not just the installed packages. PipeWire documents the supported `bluez5.codecs` names in its [property reference](https://docs.pipewire.org/page_man_pipewire-props_7.html). The earlier `spa-acp-tool list-codecs` recipe has not been established as a Bluetooth codec check.
 
 [PipeWire Guide](https://github.com/mikeroyal/PipeWire-Guide)
 
@@ -30,31 +26,31 @@ https://wiki.linuxaudio.org/wiki/system_configuration#audio_group
 
 ### Group Limits
 User must be member of a group with sufficient rtprio and memlock set (e.g., audio or realtime):
+
     sudo usermod -a -G <group_name> <user_name>
 
 ### RT Priorities
-Need to set up limits.conf for SCHED_FIFO with rtprio 80:
+The original audio check could not acquire SCHED_FIFO priority 80. The selected group limits are recorded in [Memory Management](../Performance/Memory%20Management.md); this observation is the reason for configuring them:
 See https://wiki.linuxaudio.org/wiki/system_configuration#limitsconfaudioconf
 
 ### Power Management for Audio
-Power management can't be controlled from user space; the device node /dev/cpu_dma_latency can't be accessed by the user. This prohibits DAWs like Ardour and Reaper from setting CPU DMA latency which could help prevent xruns.
+The original check found that the user could not access `/dev/cpu_dma_latency`. Review the device permissions needed by applications such as Ardour and Reaper; this was an access problem in the tested setup, not a general inability to control latency from userspace.
 See https://wiki.linuxaudio.org/wiki/system_configuration#quality_of_service_interface
 
 ### Swappiness for Audio
-vm.swappiness=180 is too high for audio work. Set swappiness to 10 for audio production:
-    vm.swappiness=10
+Keep the selected `vm.swappiness=180` for zram-backed swap. The older check recommended 10 for avoiding disk-backed swap latency, but the September 16 correction explicitly retained 180 and required latency-critical audio memory to be locked. See [Memory Management](../Performance/Memory%20Management.md).
 See https://wiki.linuxaudio.org/wiki/system_configuration#sysctlconf
 
 ## Audio Enhancement (EasyEffects)
 
-EasyEffects is a system-wide audio effects host for PipeWire (successor to PulseEffects). It applies a processing chain — limiter, auto-gain/loudness, dynamic-range compressor, 30-band parametric EQ, bass enhancer, exciter, crossfeed, reverb, delay, maximizer, and a **convolver** (impulse-response loading) — to output and input streams. The strong argument for shipping it by default: it does for laptop speakers what premium vendors (e.g. Apple) do in firmware — a generic community preset already produces a "massive" improvement, so users get good speaker sound with zero audio expertise.
+EasyEffects is a PipeWire effects host for input and output streams. Its processing options include limiting, automatic gain, compression, equalization, bass enhancement, crossfeed, reverb, delay, and convolution using impulse responses.
 
-Decision relevance for TC Benchtop Linux:
-* **Ship candidate** — add `easyeffects` to the pattern (or as a Flatpak); packaged in Tumbleweed. VERIFY package name at merge.
-* **Per-model laptop-speaker presets** in `tc-benchtop-settings` (Supported Models list) — a strong QoL differentiator for a laptop-targeted distro. JackHack96's "Advanced Auto Gain" is cited as a good generic default preset.
-* The **convolver** (loading impulse responses / IRs) is the practical "Dolby Atmos alternative" for spatial/surround upmixing on Linux — see the linux_gaming thread below.
+Evaluate it for laptop-speaker correction, with per-model presets in `tc-benchtop-settings` and a choice of package or Flatpak delivery. JackHack96’s “Advanced Auto Gain” preset is a candidate from the references. The reported improvements are reasons to test it on supported laptops, not evidence that one preset will work well on every model.
+
+The spatial-audio link below was saved from its title and has not been reviewed. An impulse-response convolver should not be described as a complete Dolby Atmos replacement on that basis.
 
 Reference links:
+
 * EasyEffects should be part of every distro (laptop speaker quality): https://www.osnews.com/story/145883/easyeffects-should-be-part-of-every-linux-distribution-and-desktop-environment-to-massively-improve-laptop-speaker-sound-quality/
 * PSA: EasyEffects can drastically improve audio: https://www.reddit.com/r/linux/comments/1laetsl/psa_easyeffects_can_drastically_improve_audio/
 * Dolby Atmos alternative for Linux (spatial audio; convolver/IR-based approaches): https://www.reddit.com/r/linux_gaming/comments/1w2f441/dolby_atmos_alternative_for_linux/ — link filed from title; thread content not yet reviewed (Reddit blocks automated fetch)
@@ -62,6 +58,7 @@ Reference links:
 ## Audio Cues (UX Sound Design)
 
 Design audio cues for:
+
 * Any delayed response/action
 * Drag and drop/file copy
 * File download
