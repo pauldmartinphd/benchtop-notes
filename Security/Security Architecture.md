@@ -16,6 +16,15 @@
 * [Kicksecure security-misc](https://www.kicksecure.com/wiki/Security-misc) / [GitHub](https://github.com/Kicksecure/security-misc)
 * [Clear Linux Security](https://www.clearlinux.org/clear-linux-documentation/guides/clear/security.html)
 
+### Magic SysRq Key
+
+##### /etc/sysctl.d/30-sysrq.conf
+
+	kernel.sysrq = 0
+
+OpenSUSE defaults to 184, which allows sync, remount read-only, reboot/poweroff and debugging dumps from the keyboard.  We turn it off completely.  Root can still use /proc/sysrq-trigger
+[Link](https://docs.kernel.org/admin-guide/sysrq.html)
+
 ## Firewalls
 
 ### Inbound
@@ -106,6 +115,20 @@ The intended administrative model is wheel-based access using the invoking userâ
 	        return polkit.Result.AUTH_SELF;
 	    }
 	});
+
+## Packet Capture for Administrators
+
+Administrators (wheel) capture network traffic with Wireshark without root.  OpenSUSE's permissions profiles let only the wireshark group run dumpcap, and that group has no members unless someone is added to it
+
+##### /usr/share/permissions/packages.d/tc-benchtop-settings.easy (and .secure)
+
+	:package: wireshark
+	/usr/bin/dumpcap                                        root:wheel        0750
+	 +capabilities cap_net_raw,cap_net_admin=ep
+
+The paranoid profile keeps OpenSUSE's setting.  An entry in /etc/permissions.local still overrides this
+
+Note: permctl reads the .easy and .secure variants only when a base file named after the package (tc-benchtop-settings) exists, even an empty one
 
 ## Change to sudo Authentication (from targetpw)
 

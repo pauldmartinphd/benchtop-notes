@@ -12,8 +12,13 @@ The selected configuration remains CUBIC with fq_codel, as recorded in the Septe
 
 	# Ubisoft fix from Universal Blue
      net.ipv4.tcp_mtu_probing = 1
+
+	# Increase netdev receive queue
+	# May help prevent losing packets
+	net.core.netdev_max_backlog = 4096
 [Link](https://www.reddit.com/r/linux_gaming/comments/10oc0dq/psa_for_people_having_trouble_connecting_to/)
 [Link](https://blog.cloudflare.com/http-2-prioritization-with-nginx/)
+[Link](https://github.com/CachyOS/CachyOS-Settings/blob/master/usr/lib/sysctl.d/70-cachyos-settings.conf)
 
 ### Alternative to evaluate
 

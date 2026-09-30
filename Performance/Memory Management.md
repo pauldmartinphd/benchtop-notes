@@ -35,11 +35,23 @@ See https://wiki.linuxaudio.org/wiki/system_configuration#sysctlconf
 
 	# Write Transparent Huge Pages policy at boot
 	# Format: type path mode user group age argument
-	w /sys/kernel/mm/transparent_hugepage/enabled       - - - - madvise
-	w /sys/kernel/mm/transparent_hugepage/defrag        - - - - defer
-	w /sys/kernel/mm/transparent_hugepage/shmem_enabled - - - - advise
+	w! /sys/kernel/mm/transparent_hugepage/enabled       - - - - always
+	# Improve performance for applications that use tcmalloc
+	# https://github.com/google/tcmalloc/blob/master/docs/tuning.md#system-level-optimizations
+	w! /sys/kernel/mm/transparent_hugepage/defrag        - - - - defer+madvise
+	w! /sys/kernel/mm/transparent_hugepage/shmem_enabled - - - - advise
 
-Note: there is a lot of debate about these settings. Depending on the workload it can help performance, hurt performance (on memory pressure) or make no difference. `always` is opt-out and `madvise` is opt-in. The selected desktop policy is `madvise`. The [gaming proposal](Gaming%20Mode.md) tests `always` during a session and restores the previous setting afterward; its benefit still needs measurement on the target workload.
+###### /etc/tmpfiles.d/30-thp-shrinker.conf
+
+	# THP Shrinker has been added in the 6.12 Kernel
+	# Default Value is 511
+	# THP=always policy vastly overprovisions THPs in sparsely accessed memory areas, resulting in excessive memory pressure and premature OOM killing
+	# 409 means that any THP that has more than 409 out of 512 (80%) zero filled pages will be split.
+	# This reduces the memory usage, when THP=always used and the memory usage goes down to around the same usage as when madvise is used, while still providing an equal performance improvement
+	w! /sys/kernel/mm/transparent_hugepage/khugepaged/max_ptes_none - - - - 409
+[Link](https://github.com/CachyOS/CachyOS-Settings/blob/master/usr/lib/tmpfiles.d/thp-shrinker.conf)
+
+Note: there is a lot of debate about these settings. Depending on the workload it can help performance, hurt performance (on memory pressure) or make no difference. `always` is opt-out and `madvise` is opt-in. The selected desktop policy is `always`, with the shrinker splitting huge pages that are mostly zeros. The [gaming proposal](Gaming%20Mode.md) disables proactive compaction during a session and restores the previous settings afterward; its benefit still needs measurement on the target workload.
 
 ###### 2024-09-07 Note: I think maybe we want 2MB THP to minimize TLB use
 See also: https://www.phoronix.com/news/Glibc-malloc-2MB-THP-AArch64
@@ -83,8 +95,8 @@ https://github.com/gissf1/zram-hibernate/issues
 ##### /etc/tmpfiles.d/30-mglru.conf
 
 	# Enable Multi-Gen LRU at boot and set a mild thrash guard
-	w /sys/kernel/mm/lru_gen/enabled    - - - - y
-	w /sys/kernel/mm/lru_gen/min_ttl_ms - - - - 1000
+	w! /sys/kernel/mm/lru_gen/enabled    - - - - y
+	w! /sys/kernel/mm/lru_gen/min_ttl_ms - - - - 1000
 
 ## OOM Killer
 

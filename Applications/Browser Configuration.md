@@ -8,12 +8,14 @@ The selected policy disables Rewards, Wallet, VPN, AI Chat, and Tor, and leaves 
 {
     "BraveRewardsDisabled": true,
     "BraveWalletDisabled": true,
-    "BraveVPNDisabled": 1,
+    "BraveVPNDisabled": true,
     "BraveAIChatEnabled": false,
     "TorDisabled": true,
     "DnsOverHttpsMode": "automatic"
 }
 ```
+
+Note: BraveVPNDisabled is a boolean policy, so it takes `true`, not `1`
 
 ## Firefox
 

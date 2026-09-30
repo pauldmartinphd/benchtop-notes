@@ -9,6 +9,18 @@
 
 GNOME Software is the application manager. Bazaar is not needed. Retain Warehouse for Flatpak management and Flatseal for permissions management.
 
+### Flathub Per User
+
+Flathub is added to each user's own Flatpak installation at their first login, so apps from Flathub install per user without an administrator password.  Flathub is not configured system-wide (OpenSUSE's flatpak-remote-flathub is left out of the image): with Flathub in both installations, flatpak asks on every install which one to use.  The service runs once for each user, so a user who removes Flathub does not get it back
+
+##### tcbl-flathub.service (user service)
+
+    flatpak remote-add --user --if-not-exists flathub /usr/share/tc-benchtop-settings/flathub.flatpakrepo
+
+GNOME Software installs Flatpak files opened from outside it (such as the .flatpakref from the Install button on flathub.org) into the user's installation:
+
+    gsettings set org.gnome.software install-bundles-system-wide false
+
 ### AppImage backend and AppImageHub
 
 GNOME Software needs an AppImage backend with AppImageHub integration so that users can discover and install AppImages through the same interface as other applications. This is a development requirement, not a feature already implemented in the Benchtop image.

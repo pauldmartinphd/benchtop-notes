@@ -12,7 +12,7 @@ Slowroll was evaluated first and rejected as a build base. On the Build Service,
 
 The build is composed of four public repositories under github.com/TechnicompLabs, each mapping to a single Build Service package.
 
-- `benchtop-settings` builds `tc-benchtop-settings`, a configuration package whose files are installed directly from `Source0` onward, without a tarball.
+- `benchtop-settings` builds `tc-benchtop-settings`, a configuration package whose files are installed directly from `Source0` onward, without a tarball. It also adds the TCBL package repository (`repo-tcbl`, at priority 90, above the openSUSE repositories) and ships the repository's signing key, which the image build imports.
 - `benchtop-patterns` builds `patterns-tc-benchtop`, which produces the metapackage `patterns-tc-benchtop-base`. The image depends on that metapackage.
 - `benchtop-branding` builds `tc-benchtop-branding`, the wallpaper, and `distribution-logos-tc-benchtop`, the Technicomp logos, which take the place of openSUSE's `distribution-logos-openSUSE-Tumbleweed` so that openSUSE's boot splash, login screen and icons show them.
 - `benchtop-image` builds `tc-benchtop-image`, the kiwi image description. It is an oem, btrfs read-only-snapshot layout derived from Aeon.

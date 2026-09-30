@@ -78,12 +78,14 @@ USB flash drives can have extremely slow write performance, allowing a copy dial
 
 ## Staggered Spin-Up
 
-### /etc/kernel/cmdline
+### /etc/modprobe.d/ahci.conf
 
-	+="libahci.ignore_sss=1"
+	options libahci ignore_sss=1
 
 "Some hardware implements staggered spin-up, which causes the OS to probe ATA interfaces serially, which can spin up the drives one-by-one and reduce the peak power usage. This slows down the boot speed, and on most consumer hardware provides no benefits at all since the drives will already spin-up immediately when the power is turned on."
 [Arch Wiki](https://wiki.archlinux.org/title/Improving_performance/Boot_process)
+
+Note: libahci is a module in the OpenSUSE kernel, so this goes in modprobe.d instead of the kernel command line.  The ahci driver reads the option when it loads either way, since modprobe also takes module options from the kernel command line.  Dracut copies modprobe.d into the initramfs
 
 ## TRIM Timer
 

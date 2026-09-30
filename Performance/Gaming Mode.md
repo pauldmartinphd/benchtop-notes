@@ -1,15 +1,15 @@
 # Gaming Mode
 
+**Status, September 29, 2026:** Resolved. THP is `always` system-wide ([memory management](Memory%20Management.md)), NTSYNC loads at every boot ([drivers and firmware](../System%20Core/Drivers%20and%20Firmware.md)), the pattern installs gamemode and steam-devices (udev rules for Steam controllers and VR hardware), and MangoHud and gamescope come from Flathub. Not implemented: the per-session compaction toggle and the ublue-os controller rules below; the other tools below remain candidates in [future ideas](Future%20Ideas.md).
+
 ## Game Mode THP Settings
 
 Transparent huge pages can reduce translation overhead by backing memory with larger pages. The available sizes depend on the architecture and kernel; modern kernels also support sizes below the traditional 2 MiB PMD-sized page on x86. THP policy is controlled through sysfs, while compaction also has sysctl controls. See the [kernel THP documentation](https://docs.kernel.org/admin-guide/mm/transhuge.html).
 
-Proposal: enable THP and disable proactive compaction for gaming sessions, restore to defaults when the session ends (some workloads such as databases can be negatively impacted by memory fragmentation).
+Proposal: disable proactive compaction for gaming sessions, restore to defaults when the session ends (some workloads such as databases can be negatively impacted by memory fragmentation). THP itself is already `always`, with `shmem_enabled` at `advise`, in the [memory management](Memory%20Management.md) settings.
 
-Enable when gaming, restore when game ends:
+Disable when gaming, restore when game ends:
 
-    echo always | sudo tee /sys/kernel/mm/transparent_hugepage/enabled
-    echo advise | sudo tee /sys/kernel/mm/transparent_hugepage/shmem_enabled
     echo 0 | sudo tee /proc/sys/vm/compaction_proactiveness
     echo 0 | sudo tee /sys/kernel/mm/transparent_hugepage/khugepaged/defrag
 

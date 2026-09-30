@@ -1,6 +1,6 @@
 # Kernel tuning
 
-The runtime settings below retain the September 16 corrections. Compile-time choices and alternative kernel projects are recorded separately from those settings. The `+` markers in the command-line notes mean “append this parameter”; they are not literal kernel arguments. `sdbootutil update-all-entries` is a command to run after editing, not part of the command line.
+The runtime settings below retain the September 16 corrections. Compile-time choices and alternative kernel projects are recorded separately from those settings. The `+` markers in the command-line notes mean “append this parameter”; they are not literal kernel arguments. `sdbootutil update-all-entries` is a command to run after editing, not part of the command line. Parameters that can also be set outside the kernel command line (sysctl, modprobe.d, systemd configuration) are set there instead.
 
 ## Preemption
 
@@ -43,11 +43,13 @@ rtkit-daemon (RealtimeKit) is a D-Bus system service that allows user processes 
 
 ## Watchdog
 
-##### /etc/kernel/cmdline
+##### /etc/sysctl.d/30-watchdog.conf
 
-    +="nowatchdog"
-    +="nmi_watchdog=0"
-      sdbootutil update-all-entries
+    # Disable the soft lockup detector
+	kernel.soft_watchdog = 0
+
+	# Disable NMI watchdog
+	-kernel.nmi_watchdog = 0
 
 ##### /etc/modprobe.d/blacklist.conf
 
@@ -56,6 +58,15 @@ rtkit-daemon (RealtimeKit) is a D-Bus system service that allows user processes 
 
 	# Blacklist the AMD SP5100 TCO Watchdog
 	blacklist sp5100_tco
+
+	# Blacklist the ACPI/WDAT Watchdog/Timer module
+	blacklist wdat_wdt
+
+This action will speed up your boot and shutdown, because one less module is loaded.  Additionally disabling watchdog timers increases performance and lowers power consumption
+[Link](https://github.com/CachyOS/CachyOS-Settings/blob/master/usr/lib/modprobe.d/blacklist.conf)
+[Link](https://github.com/CachyOS/CachyOS-Settings/blob/master/usr/lib/sysctl.d/70-cachyos-settings.conf)
+
+Note: the `-` in front of kernel.nmi_watchdog tells systemd-sysctl to ignore the error on machines without an NMI watchdog (some VMs)
 
 ## Split Lock Mitigate
 

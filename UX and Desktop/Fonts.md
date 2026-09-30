@@ -10,13 +10,16 @@ Create symlinks for good-looking rendering defaults:
 
 ### 2. Fontconfig: /etc/fonts/local.conf
 
+**Status, September 29, 2026:** Resolved. Noto is the default for serif, sans-serif and monospace: serif through OpenSUSE's own list, sans-serif and monospace through tc-benchtop-settings (below). The replacement list is not implemented, because Flatpak apps do not read the host's fontconfig configuration, and the pattern no longer carries the fonts that were there only for it (Courier Prime, Merriweather, Overpass).
+
 Default font families:
 
-* serif → Heuristica
-* sans-serif → Noto Sans, Noto Sans CJK SC
-* monospace → Liberation Mono, Noto Sans Mono CJK SC
-* fantasy → Signika
-* cursive → TeX Gyre Chorus
+* serif → Noto Serif (OpenSUSE's default, so no rule)
+* sans-serif → Noto Sans
+* monospace → Noto Sans Mono
+* fantasy, cursive → no rule (only web pages use them, and browsers are Flatpak apps)
+
+CJK text is left to fontconfig, which picks the Japanese, Korean or Chinese Noto CJK font by the language of the text.
 
 The imported XML had missing opening and closing tags. The complete example below retains its family mappings, including entries omitted from the earlier summary. `Corberl` and `SegoeUI` are corrected to `Corbel` and `Segoe UI`. These are selected substitutions; they are not a claim of metric compatibility with every original face.
 
@@ -194,6 +197,26 @@ The imported XML had missing opening and closing tags. The complete example belo
   </match>
 </fontconfig>
 ```
+
+Source: bohoomil's replacement list from the infinality-bundle documentation (http://bohoomil.com/doc/05-fonts/, until ibfonts-meta-extended), by way of cryzed's Infinality-like fontconfig configuration
+[Link](https://gist.github.com/cryzed/4f64bb79e80d619866ee0b18ba2d32fc)
+
+#### Implemented in tc-benchtop-settings
+
+##### /usr/share/fontconfig/conf.avail/59-tcbl-family-prefer.conf (linked into /etc/fonts/conf.d)
+
+    <alias>
+      <family>sans-serif</family>
+      <prefer><family>Noto Sans</family></prefer>
+    </alias>
+    <alias>
+      <family>monospace</family>
+      <prefer><family>Noto Sans Mono</family></prefer>
+    </alias>
+
+Noto for sans-serif and monospace, as upstream fontconfig has set them since 2.14 (60-latin.conf), which is the configuration Flatpak runtimes ship.  OpenSUSE's fonts-config would otherwise pick Roboto and Source Code Pro.  The file sorts after local.conf (55), the user's configuration (56) and fonts-config's settings (58), so their preferences come first
+
+The replacement list above is not implemented.  Flatpak apps get the host's fonts but not its fontconfig configuration, and TCBL's GUI apps come from Flathub, so the rules would only reach GNOME itself, which names its own fonts (Adwaita Sans and Adwaita Mono), and command-line tools.  fontconfig's own metric-compatible aliases (30-metric-aliases.conf) still replace Arial, Times New Roman, Calibri, Cambria and Georgia, in Flatpak apps too
 
 ### 3. Install Distro Fonts
 
