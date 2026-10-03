@@ -74,6 +74,8 @@ Recorded settings for systemd-zram-service:
 
 ### ZRAM Hibernate
 
+#TODO — With the custom kernel, zram stays the everyday swap and a swap file on disk holds the hibernation image. See [Build Configuration](../Build%20Configuration.md#custom-kernel)
+
 https://github.com/gissf1/zram-hibernate/issues
 
 ## Resource Limits

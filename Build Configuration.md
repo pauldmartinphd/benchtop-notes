@@ -104,3 +104,15 @@ When a package requires a capability that several packages provide, the build fa
 ## Current state
 
 The image resolves cleanly against `openSUSE:Factory/snapshot` and builds. Remaining work, in rough order: a `tc-benchtop-release` package to give the system its own identity in place of `openSUSE-release-appliance`; a custom kernel; and implementing the GNOME old stable (n−1) policy. Pinning the whole Tumbleweed snapshot was noted as an interim option, but it also holds back the rest of the package set; it does not by itself implement a separately maintained GNOME branch.
+
+### Custom kernel
+
+#TODO — Hibernation with Secure Boot
+
+- openSUSE's kernels lock themselves down whenever they boot with Secure Boot (a SUSE patch, `CONFIG_LOCK_DOWN_IN_EFI_SECURE_BOOT`), and a locked-down kernel refuses to hibernate. Upstream has no such trigger. Build the TCBL kernel without it, and sign it with TCBL's own key, enrolled once per machine through MOK.
+- Module and kexec signatures stay enforced without lockdown. With Secure Boot on, the upstream IMA architecture policy (`CONFIG_IMA_ARCH_POLICY`, already on in openSUSE's config) requires signed modules and kexec images and refuses the older `kexec_load` call, which cannot be signature-checked. `CONFIG_STRICT_DEVMEM` and `CONFIG_IO_STRICT_DEVMEM` are on as well. The rest of what lockdown blocks, such as MSR writes, direct I/O port and PCI access, ACPI table overrides and full debugfs access, is allowed unless the setting below turns lockdown on.
+- Setting toggle: hibernation (no lockdown, the default) or lockdown. The setting raises lockdown early in the initrd by writing `integrity` to `/sys/kernel/security/lockdown`, with no kernel command line flag. It has to run before systemd looks for a hibernation image, so that a locked-down boot never resumes one. Root can turn the setting off for the next boot, so unlike openSUSE's automatic lockdown it protects only the running kernel.
+- Hibernation swap: a swap file sized to RAM, in its own Btrfs subvolume on the encrypted root (`btrfs filesystem mkswapfile`; a subvolume that holds a swap file cannot be snapshotted). zram stays the everyday swap at the higher priority; systemd ignores zram when it picks the swap to hibernate to.
+- Resume: systemd stores the swap file's location in the `HibernateLocation` EFI variable and resumes from it in the initrd once the TPM has unlocked the disk, so no `resume=` flag is needed.
+- TPM: the disk key is sealed to PCRs 4, 5, 7 and 9 (tik's `post/15-encrypt`), and shim records in PCR 7 the certificate that verified each image it checks. A kernel signed with TCBL's key instead of openSUSE's changes PCR 7, so the seal has to be updated when a system switches kernels. Check whether sdbootutil's prediction handles that; if not, that boot asks for the recovery key.
+- Test on hardware that hibernation still succeeds when zram is well filled. See ZRAM Hibernate in [Memory Management](Performance/Memory%20Management.md#zram-hibernate).
