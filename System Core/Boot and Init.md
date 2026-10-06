@@ -62,7 +62,7 @@ Note: with `auto`, a hang shows up as "A start job is running for ..." once boot
 	sudo systemctl restart rebootmgr
     sudo systemctl disable --now rebootmgr.service
 
-health-checker rolls back to the previous snapshot if the first boot after an update fails.  create-dirs-from-rpmdb creates the /var directories of packages installed by transactional-update
+health-checker rolls back if the first boot after an update fails: TCBL's patched version (home:technicomp:benchtop) makes the newest snapshot that passed the checks the default for the next boot, without rebooting or starting an emergency shell.  create-dirs-from-rpmdb creates the /var directories of packages installed by transactional-update
 
 ### x86-64-v3 Libraries
 
