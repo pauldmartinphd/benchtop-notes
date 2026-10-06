@@ -78,6 +78,14 @@ Recorded settings for systemd-zram-service:
 
 https://github.com/gissf1/zram-hibernate/issues
 
+### Compressed RAM Devices (CRAM)
+
+#TODO — Track upstream. Meta (Gregory Price) has proposed kernel support for compressed RAM: memory devices with inline hardware compression, today CXL memory expanders, which report more capacity than they physically have. The kernel demotes cold pages to the device, keeps them mapped but write-protected, and moves a page back to regular RAM when it is written, so the compression ratio cannot run away. It is not a replacement for zram or zswap, and it needs CXL hardware, which desktops and laptops do not have
+
+**Status, October 6, 2026:** Not in mainline (7.3-rc6 has no mm/cram.c). The base series, Private Memory NUMA Nodes, is at v5 (July 2026), with CRAM split out to be submitted separately. Talk at Linux Plumbers on October 5, 2026
+
+[LPC 2026 talk](https://lpc.events/event/20/contributions/2424/) [RFC v4 mm/cram patch](https://lkml.iu.edu/2602.2/06848.html) [v5 thread](https://lkml.iu.edu/2607.2/15194.html) [LWN](https://lwn.net/Articles/1053508/) [Reddit](https://www.reddit.com/r/linux/comments/1wyz82o/meta_developing_compressed_ram_cram_for_linux/)
+
 ## Resource Limits
 
 ### /etc/security/limits.d/20-audio.conf

@@ -116,3 +116,8 @@ The image resolves cleanly against `openSUSE:Factory/snapshot` and builds. Remai
 - Resume: systemd stores the swap file's location in the `HibernateLocation` EFI variable and resumes from it in the initrd once the TPM has unlocked the disk, so no `resume=` flag is needed.
 - TPM: the disk key is sealed to PCRs 4, 5, 7 and 9 (tik's `post/15-encrypt`), and shim records in PCR 7 the certificate that verified each image it checks. A kernel signed with TCBL's key instead of openSUSE's changes PCR 7, so the seal has to be updated when a system switches kernels. Check whether sdbootutil's prediction handles that; if not, that boot asks for the recovery key.
 - Test on hardware that hibernation still succeeds when zram is well filled. See ZRAM Hibernate in [Memory Management](Performance/Memory%20Management.md#zram-hibernate).
+
+#TODO — IOMMU defaults
+
+- Keep upstream's `CONFIG_INTEL_IOMMU_DEFAULT_ON=y`, which openSUSE's config turns off, and then drop `intel_iommu=on` from the kernel command line in `config.sh`.
+- Keep openSUSE's `CONFIG_IOMMU_DEFAULT_PASSTHROUGH=y` (upstream's x86 default is `CONFIG_IOMMU_DEFAULT_DMA_LAZY`). This is what `iommu=pt` sets: devices inside the machine get unrestricted DMA, and devices behind ports the firmware marks as external (Thunderbolt, USB4) are always translated.
