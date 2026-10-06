@@ -9,7 +9,3 @@
 # research strategy. Ignored belt-and-suspenders so an in-place `git init`
 # in the source notes folder can never accidentally stage it.
 Patching Research Plan.md
-
-# Working files from Claude sessions (designs, audits, a patch): kept with the
-# notes, not published.
-Claude outputs/
